@@ -56,7 +56,7 @@ func stringToBsonString(s string) []byte {
 
 func testWrite() {
 	var i int32 = 888
-	buffer := new(bytes.Buffer) // 0 len but read to write
+	buffer := new(bytes.Buffer) // 0 len but ready to write
 	binary.Write(buffer, binary.LittleEndian, &i)
 	fmt.Printf("% x\n", buffer.Bytes())
 }
