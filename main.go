@@ -92,19 +92,23 @@ func pr(r0 rune) []byte {
 	return res
 }
 
-func readModUTF8(b []byte) {
-	var bunk [4]byte
-	counter := 0
-	for i := 0; i < len(b); i++ {
-		c := b[i] & 0xff
-		tmp := c >> 4
-		if tmp >= 0 && tmp < 7 {
-			bunk[counter] = c
-			counter++
-		} else if tmp == 12 || tmp == 13 {
-
-		}
+// this will take an array of up to
+// 3 bytes and spit out a single rune
+func readModUTF8(b []byte) rune {
+	var res rune
+	c := b[0] >> 4
+	if len(b) == 1 {
+		res = rune(c >> 4)
+	} else if len(b) == 2 {
+		res = rune(((c & 0x1F) << 6) | (b[1] & 0x3F))
+	} else if len(b) == 3 {
+		fmt.Println("case3")
+		//var j uint16 = ((c & 0x0f) << 12)
+		res = rune(((c & 0x0F) << 12) |
+			((b[1] & 0x3F) << 6) |
+			((b[2] & 0x3F) << 0))
 	}
+	return res
 }
 
 func testpr() {
@@ -112,7 +116,8 @@ func testpr() {
 	runes := []rune(placeOfInterest)
 	fmt.Println(runes)
 	myBytes := pr(runes[0])
-	readModUTF8(myBytes)
+	newrune := readModUTF8(myBytes)
+	fmt.Println(newrune)
 }
 
 func main() {
@@ -123,6 +128,6 @@ func main() {
 	//fmt.Printf("res2 % x\n", b2)
 	b := newBsonString("tony", "iscool")
 	fmt.Println(b)
-
-	myBytes := testpr()
+	testpr()
+	fmt.Println(rune(0xffffffff - 1))
 }
