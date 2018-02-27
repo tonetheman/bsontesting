@@ -19,6 +19,7 @@ type bsonString struct {
 	// which is a modified utf8 string
 	// no null bytes
 	// followed by a single null byte
+	// this is not what i thought it was
 	key []byte
 	// followed by string
 	val []byte
@@ -61,6 +62,59 @@ func testWrite() {
 	fmt.Printf("% x\n", buffer.Bytes())
 }
 
+// modified utf 8
+// see here: https://docs.oracle.com/javase/8/docs/api/java/io/DataInput.html#modified-utf-8
+// http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/6-b14/java/io/DataOutputStream.java
+func pr(r0 rune) []byte {
+	res := make([]byte, 0)
+	if r0 >= 0x0001 && r0 <= 0x007f {
+		fmt.Println("case1")
+		a := r0
+		fmt.Println(a)
+		res = append(res, byte(a))
+	} else if (r0 >= 0x0080 && r0 <= 0x07ff) || r0 == 0x0000 {
+		fmt.Println("case2")
+		a := (0xC0 | ((r0 >> 6) & 0x1F))
+		b := (0x80 | ((r0 >> 0) & 0x3F))
+		fmt.Println(a, b)
+		res = append(res, byte(a))
+		res = append(res, byte(b))
+	} else {
+		fmt.Println("case3")
+		a := (0xE0 | ((r0 >> 12) & 0x0F))
+		b := (0x80 | ((r0 >> 6) & 0x3F))
+		c := (0x80 | ((r0 >> 0) & 0x3F))
+		fmt.Println(a, b, c)
+		res = append(res, byte(a))
+		res = append(res, byte(b))
+		res = append(res, byte(c))
+	}
+	return res
+}
+
+func readModUTF8(b []byte) {
+	var bunk [4]byte
+	counter := 0
+	for i := 0; i < len(b); i++ {
+		c := b[i] & 0xff
+		tmp := c >> 4
+		if tmp >= 0 && tmp < 7 {
+			bunk[counter] = c
+			counter++
+		} else if tmp == 12 || tmp == 13 {
+
+		}
+	}
+}
+
+func testpr() {
+	const placeOfInterest = `⌘`
+	runes := []rune(placeOfInterest)
+	fmt.Println(runes)
+	myBytes := pr(runes[0])
+	readModUTF8(myBytes)
+}
+
 func main() {
 	//testWrite()
 	//b := stringTocstring("tony")
@@ -69,4 +123,6 @@ func main() {
 	//fmt.Printf("res2 % x\n", b2)
 	b := newBsonString("tony", "iscool")
 	fmt.Println(b)
+
+	myBytes := testpr()
 }

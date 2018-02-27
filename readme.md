@@ -1,6 +1,9 @@
 
 
-playing around with bson in golang
+# playing around with bson in golang
+
+modified utf8 defined here
+https://docs.oracle.com/javase/8/docs/api/java/io/DataInput.html#modified-utf-8
 
 main site: http://bsonspec.org/
 
